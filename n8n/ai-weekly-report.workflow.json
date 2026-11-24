@@ -1,0 +1,221 @@
+{
+  "name": "AI weekly sales report",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "name": "Every Monday 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ],
+      "id": "a2"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/divyaravalphp/ai-report-automation/main/data/sales.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "name": "Fetch sales CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        100
+      ],
+      "id": "a3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CSV text from the previous node, validate rows, compute KPIs.\nconst text = $input.first().json.data;\nconst lines = text.trim().split(/\\r?\\n/);\nconst header = lines[0].split(',').map(h => h.trim().toLowerCase());\nconst required = ['date', 'region', 'product', 'units', 'revenue'];\nconst missing = required.filter(c => !header.includes(c));\nif (missing.length) throw new Error('CSV is missing columns: ' + missing.join(', '));\n\nconst idx = Object.fromEntries(header.map((h, i) => [h, i]));\nconst rows = [];\nlet dropped = 0;\nfor (const line of lines.slice(1)) {\n  const c = line.split(',');\n  const date = new Date(c[idx.date]);\n  const revenue = parseFloat(c[idx.revenue]);\n  const units = parseInt(c[idx.units], 10) || 0;\n  if (isNaN(date) || isNaN(revenue) || revenue < 0) { dropped++; continue; }\n  rows.push({ date, month: c[idx.date].slice(0, 7), region: c[idx.region], product: c[idx.product], units, revenue });\n}\n\nconst sumBy = (key) => {\n  const out = {};\n  for (const r of rows) out[r[key]] = (out[r[key]] || 0) + r.revenue;\n  return Object.fromEntries(Object.entries(out).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, Math.round(v)]));\n};\nconst round = (n) => Math.round(n * 10) / 10;\n\nconst months = [...new Set(rows.map(r => r.month))].sort();\nconst lastDate = new Date(Math.max(...rows.map(r => r.date)));\nconst firstDate = new Date(Math.min(...rows.map(r => r.date)));\nconst lastDayOfMonth = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 0).getDate();\nconst lastMonthComplete = lastDate.getDate() >= lastDayOfMonth - 2;\n\nconst regionMonth = {};\nfor (const r of rows) {\n  regionMonth[r.region] = regionMonth[r.region] || {};\n  regionMonth[r.region][r.month] = (regionMonth[r.region][r.month] || 0) + r.revenue;\n}\nconst mom = {};\nif (months.length >= 2) {\n  const [prev, last] = months.slice(-2);\n  for (const [region, m] of Object.entries(regionMonth)) {\n    if (m[prev]) mom[region] = round(((m[last] || 0) - m[prev]) / m[prev] * 100);\n  }\n}\n\nconst kpis = {\n  period: `${firstDate.toISOString().slice(0, 10)} to ${lastDate.toISOString().slice(0, 10)}`,\n  currency: 'not specified in the data',\n  rows_used: rows.length,\n  rows_dropped: dropped,\n  total_revenue: Math.round(rows.reduce((s, r) => s + r.revenue, 0)),\n  total_units: rows.reduce((s, r) => s + r.units, 0),\n  monthly_revenue: Object.fromEntries(months.map(m => [m, Math.round(rows.filter(r => r.month === m).reduce((s, r) => s + r.revenue, 0))])),\n  revenue_by_region_total_for_period: sumBy('region'),\n  revenue_by_product_total_for_period: sumBy('product'),\n  region_mom_change_pct: mom,\n  last_month_is_partial: !lastMonthComplete,\n  last_month_note: lastMonthComplete ? 'complete' : `${months[months.length - 1]} only has data up to day ${lastDate.getDate()}, so month-over-month changes understate it`,\n};\n\nreturn [{ json: { kpis } }];\n"
+      },
+      "name": "Compute KPIs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        100
+      ],
+      "id": "a4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'gemini-3.5-flash',\n  temperature: 0.2,\n  response_format: { type: 'json_object' },\n  messages: [{\n    role: 'user',\n    content: 'You are a business analyst. Using ONLY the KPI data below, write exactly 3 concise bullet points for a management report: the headline result, the biggest risk or decline, and one recommended action. Use the actual numbers. Do not add any currency symbol. Totals by region and product are for the whole period, not monthly. If last_month_is_partial is true, say that month-over-month changes are affected by the incomplete month. Return JSON: {\"bullets\": [\"...\", \"...\", \"...\"]}\\n\\nKPIs:\\n' + JSON.stringify($json.kpis, null, 2)\n  }]\n}) }}",
+        "options": {}
+      },
+      "name": "AI summary (Gemini)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        100
+      ],
+      "id": "a5",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate the LLM answer; fall back to a rule-based summary if anything is wrong.\nconst kpis = $('Compute KPIs').first().json.kpis;\nconst res = $input.first().json;\nlet bullets = null;\nlet source = 'AI';\nconst warnings = [];\n\ntry {\n  const content = res.choices[0].message.content;\n  const cleaned = content.replace(/^```(json)?/i, '').replace(/```$/, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (!Array.isArray(parsed.bullets) || parsed.bullets.length !== 3 || parsed.bullets.some(b => typeof b !== 'string' || !b.trim())) {\n    throw new Error('AI output did not have exactly 3 bullets');\n  }\n  bullets = parsed.bullets.map(b => b.trim());\n  if (bullets.some(b => /[$\u20ac\u00a3\u20b9]/.test(b))) warnings.push('AI added a currency symbol that is not in the data');\n} catch (e) {\n  source = 'rule-based fallback';\n  warnings.push('AI step failed: ' + (res.error?.message || e.message));\n  const topRegion = Object.keys(kpis.revenue_by_region_total_for_period)[0];\n  const topProduct = Object.keys(kpis.revenue_by_product_total_for_period)[0];\n  const mom = kpis.region_mom_change_pct;\n  const worst = Object.keys(mom).sort((a, b) => mom[a] - mom[b])[0];\n  bullets = [\n    `Total revenue of ${kpis.total_revenue.toLocaleString('en-IN')} from ${kpis.total_units} units (${kpis.period}); ${topRegion} is the top region and ${topProduct} the top product.`,\n    `${worst} changed ${mom[worst]}% month over month, the weakest region${kpis.last_month_is_partial ? ' (last month is incomplete)' : ''}.`,\n    `Review the ${worst} pipeline and pricing before next month's close.`,\n  ];\n}\n\nreturn [{ json: { bullets, source, warnings, kpis } }];\n"
+      },
+      "name": "Validate AI output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        100
+      ],
+      "id": "a6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the HTML report (ready to email or save).\nconst { bullets, source, warnings, kpis } = $input.first().json;\nconst li = bullets.map(b => `<li>${b}</li>`).join('');\nconst rows = Object.entries(kpis.revenue_by_region_total_for_period)\n  .map(([k, v]) => `<tr><td>${k}</td><td style=\"text-align:right\">${v.toLocaleString('en-IN')}</td></tr>`).join('');\nconst warn = warnings.length ? `<p style=\"color:#b45309\"><b>Checks:</b> ${warnings.join('; ')}</p>` : '';\nconst html = `<div style=\"font-family:Arial,sans-serif;max-width:640px\">\n<h2>Sales performance report</h2>\n<p style=\"color:#666\">Period: ${kpis.period} &middot; Summary source: ${source}${kpis.last_month_is_partial ? ' &middot; ' + kpis.last_month_note : ''}</p>\n<h3>Summary</h3><ul>${li}</ul>${warn}\n<h3>Revenue by region</h3><table cellpadding=\"6\">${rows}</table></div>`;\nreturn [{ json: { subject: `Sales report - ${kpis.period}`, html, bullets, source, warnings } }];\n"
+      },
+      "name": "Build HTML report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        100
+      ],
+      "id": "a7"
+    },
+    {
+      "parameters": {
+        "fromEmail": "you@example.com",
+        "toEmail": "manager@example.com",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "name": "Email report (optional)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        100
+      ],
+      "id": "a8",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Fetch sales CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Monday 9 AM": {
+      "main": [
+        [
+          {
+            "node": "Fetch sales CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch sales CSV": {
+      "main": [
+        [
+          {
+            "node": "Compute KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute KPIs": {
+      "main": [
+        [
+          {
+            "node": "AI summary (Gemini)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI summary (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Validate AI output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate AI output": {
+      "main": [
+        [
+          {
+            "node": "Build HTML report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HTML report": {
+      "main": [
+        [
+          {
+            "node": "Email report (optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
