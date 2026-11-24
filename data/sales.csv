@@ -1,0 +1,109 @@
+date,region,product,units,revenue
+2026-09-01,North,Consulting,2,2905.34
+2026-09-01,South,Audit Basic,1,877.11
+2026-09-01,East,Audit Basic,3,2459.61
+2026-09-01,West,Audit Pro,1,2101.88
+2026-09-04,North,Training,1,557.47
+2026-09-04,South,Training,1,663.77
+2026-09-04,East,Audit Basic,2,1652.72
+2026-09-04,West,Audit Basic,4,2788.36
+2026-09-07,North,Audit Pro,1,2477.41
+2026-09-07,South,Audit Pro,3,7130.72
+2026-09-07,East,Audit Basic,3,2414.06
+2026-09-07,West,Audit Pro,1,2495.63
+2026-09-10,North,Audit Pro,3,6472.89
+2026-09-10,South,Audit Basic,1,847.2
+2026-09-10,East,Training,4,2552.81
+2026-09-10,West,Training,4,2352.1
+2026-09-13,North,Audit Pro,2,5239.15
+2026-09-13,South,Audit Pro,1,2527.19
+2026-09-13,East,Training,3,1877.73
+2026-09-13,West,Consulting,1,1367.97
+2026-09-16,North,Training,2,1341.04
+2026-09-16,South,Audit Pro,4,9726.03
+2026-09-16,East,Audit Basic,3,2216.34
+2026-09-16,West,Consulting,4,6374.2
+2026-09-19,North,Training,1,690.95
+2026-09-19,South,Consulting,4,6640.64
+2026-09-19,East,Audit Basic,1,824.68
+2026-09-19,West,Consulting,4,5864.82
+2026-09-22,North,Training,3,1623.15
+2026-09-22,South,Training,3,1705.84
+2026-09-22,East,Audit Basic,4,2659.98
+2026-09-22,West,Consulting,2,3383.29
+2026-09-25,North,Training,4,2862.11
+2026-09-25,South,Training,1,572.34
+2026-09-25,East,Training,3,1910.69
+2026-09-25,West,Training,3,2026.14
+2026-09-28,North,Consulting,4,7284.53
+2026-09-28,South,Audit Pro,1,2313.14
+2026-09-28,East,Audit Pro,2,3876.11
+2026-09-28,West,Audit Pro,3,7183.18
+2026-10-01,North,Audit Pro,4,10427.09
+2026-10-01,South,Consulting,2,3409.3
+2026-10-01,East,Audit Basic,4,3368.54
+2026-10-01,West,Training,4,2501.81
+2026-10-04,North,Audit Basic,4,3603.55
+2026-10-04,South,Audit Basic,2,1507.19
+2026-10-04,East,Audit Pro,4,8058.02
+2026-10-04,West,Consulting,1,1430.06
+2026-10-07,North,Audit Pro,1,2968.33
+2026-10-07,South,Audit Basic,1,969.93
+2026-10-07,East,Training,2,1158.5
+2026-10-07,West,Consulting,3,4866.96
+2026-10-10,North,Audit Basic,4,4031.53
+2026-10-10,South,Training,4,2621.23
+2026-10-10,East,Audit Basic,2,1299.14
+2026-10-10,West,Consulting,3,4907.08
+2026-10-13,North,Audit Pro,1,2417.47
+2026-10-13,South,Consulting,2,3504.02
+2026-10-13,East,Audit Basic,3,2513.98
+2026-10-13,West,Audit Basic,3,2666.64
+2026-10-16,North,Audit Pro,3,8663.47
+2026-10-16,South,Consulting,2,3450.87
+2026-10-16,East,Audit Pro,2,4785.14
+2026-10-16,West,Audit Pro,2,5368.26
+2026-10-19,North,Consulting,1,1926.76
+2026-10-19,South,Consulting,4,6234.5
+2026-10-19,East,Consulting,4,5926.1
+2026-10-19,West,Consulting,3,4405.77
+2026-10-22,North,Audit Basic,2,1787.81
+2026-10-22,South,Consulting,2,3364.9
+2026-10-22,East,Audit Basic,4,3226.36
+2026-10-22,West,Consulting,1,1861.04
+2026-10-25,North,Audit Basic,4,3939.6
+2026-10-25,South,Audit Pro,4,12167.6
+2026-10-25,East,Training,3,1406.55
+2026-10-25,West,Training,4,2643.41
+2026-10-28,North,Audit Basic,2,1647.03
+2026-10-28,South,Audit Pro,1,2455.04
+2026-10-28,East,Training,2,1098.79
+2026-10-28,West,Training,3,1844.22
+2026-10-31,North,Audit Pro,1,2357.79
+2026-10-31,South,Audit Basic,2,1803.46
+2026-10-31,East,Audit Pro,2,3625.87
+2026-10-31,West,Audit Pro,3,8282.89
+2026-11-03,North,Consulting,3,5278.06
+2026-11-03,South,Audit Pro,1,3119.71
+2026-11-03,East,Consulting,4,5499.61
+2026-11-03,West,Training,2,1402.26
+2026-11-06,North,Audit Basic,4,4037.24
+2026-11-06,South,Audit Basic,2,1680.78
+2026-11-06,East,Training,1,529.62
+2026-11-06,West,Consulting,4,7586.12
+2026-11-09,North,Audit Basic,1,867.23
+2026-11-09,South,Consulting,1,1902.4
+2026-11-09,East,Training,1,557.54
+2026-11-09,West,Audit Basic,4,3555.71
+2026-11-12,North,Audit Pro,3,8374.54
+2026-11-12,South,Training,2,1500.63
+2026-11-12,East,Consulting,2,2829.94
+2026-11-12,West,Audit Pro,4,10042.12
+2026-11-15,North,Training,3,1863.4
+2026-11-15,South,Audit Pro,4,9940.07
+2026-11-15,East,Consulting,1,1426.86
+2026-11-15,West,Audit Pro,3,7634.24
+2026-11-18,North,Audit Pro,4,10506.93
+2026-11-18,South,Audit Basic,4,4265.59
+2026-11-18,East,Audit Pro,2,3639.76
+2026-11-18,West,Training,4,2729.58
