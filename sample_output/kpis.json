@@ -1,0 +1,28 @@
+{
+  "period": "01 Sep 2026 to 18 Nov 2026",
+  "total_revenue": 386113.86,
+  "total_units": 277,
+  "monthly_revenue": {
+    "2026-09": 122840.32,
+    "2026-10": 162503.6,
+    "2026-11": 100769.94
+  },
+  "revenue_by_region": {
+    "West": 109665.74,
+    "North": 106151.87,
+    "South": 96901.2,
+    "East": 73395.05
+  },
+  "revenue_by_product": {
+    "Audit Pro": 176377.67,
+    "Consulting": 103631.14,
+    "Audit Basic": 63511.37,
+    "Training": 42593.68
+  },
+  "region_mom_change_pct": {
+    "East": -60.3,
+    "North": -29.3,
+    "South": -46.0,
+    "West": -19.2
+  }
+}
